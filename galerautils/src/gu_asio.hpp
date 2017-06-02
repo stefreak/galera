@@ -60,6 +60,8 @@ namespace gu
     {
         /// Enable SSL explicitly
         const std::string use_ssl("socket.ssl");
+        /// SSL Peer Verification
+        const std::string ssl_verify_peer("socket.ssl_verify_peer");
         /// SSL cipher list
         const std::string ssl_cipher("socket.ssl_cipher");
         /// SSL compression algorithm

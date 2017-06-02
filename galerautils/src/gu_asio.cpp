@@ -11,6 +11,7 @@ void gu::ssl_register_params(gu::Config& conf)
 {
     // register SSL config parameters
     conf.add(gu::conf::use_ssl);
+    conf.add(gu::conf::ssl_verify_peer);
     conf.add(gu::conf::ssl_cipher);
     conf.add(gu::conf::ssl_compression);
     conf.add(gu::conf::ssl_key);
@@ -66,6 +67,14 @@ void gu::ssl_init_options(gu::Config& conf)
         // cipher list
         const std::string cipher_list(conf.get(conf::ssl_cipher, "AES128-SHA"));
         conf.set(conf::ssl_cipher, cipher_list);
+
+        // peer verification
+        bool verify_peer(conf.get(conf::ssl_verify_peer, true));
+        if (verify_peer == false)
+        {
+            log_warn << "disabling SSL peer verification, THIS IS NOT SECURE!";
+        }
+        conf.set(conf::ssl_verify_peer, verify_peer);
 
         // compression
         bool compression(conf.get(conf::ssl_compression, true));
@@ -124,7 +133,9 @@ namespace
 void gu::ssl_prepare_context(const gu::Config& conf, asio::ssl::context& ctx,
                              bool verify_peer_cert)
 {
-    ctx.set_verify_mode(asio::ssl::context::verify_peer |
+    bool verify_peer(conf.get(conf::ssl_verify_peer, true));
+    ctx.set_verify_mode((verify_peer == true ?
+                         asio::ssl::context::verify_peer : asio::ssl::context::verify_none) |
                         (verify_peer_cert == true ?
                          asio::ssl::context::verify_fail_if_no_peer_cert : 0));
     SSLPasswordCallback cb(conf);
